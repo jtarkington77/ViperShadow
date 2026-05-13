@@ -15,7 +15,7 @@ VIPERSHADOW is a self-hosted dark web intelligence platform built for security o
 
 **Part of the VenomousViper Labs security toolkit.**
 
-> _[screenshot: intelligence report — hero image]_
+![Intelligence report — Conti investigation with populated findings at HIGH confidence](assets/screenshots/intel-report-conti.png)
 
 ---
 
@@ -37,6 +37,18 @@ The security operator who needs to actually investigate something — a threat a
 
 VIPERSHADOW is an interactive investigation platform designed around the operational constraints of Tor scraping. The pipeline handles the mechanical work — searching, scraping, matching, IOC extraction, LLM synthesis. The operator stays in the loop for judgment calls on gated content.
 
+### Boot and operator setup
+
+![Boot sequence with Tor circuit bootstrapping and engine initialization](assets/screenshots/login-boot.png)
+
+Each session begins with a secure boot sequence — Tor circuit bootstrap, intelligence module load, IOC extractor arming, match engine initialization, and LLM analysis ring activation. The operator authenticates against a JWT-protected backend; first-login bootstraps the operator account.
+
+### Investigation configuration
+
+![Keyword mode investigation setup with target configuration panel](assets/screenshots/setup-keyword-mode.png)
+
+The left panel configures the investigation: mode selection (Identity, Threat Actor, Domain, Keyword), target fields appropriate to the mode, model selection (OpenRouter or local Ollama), thread count, fuzzy match threshold, and scrape depth.
+
 ### Pipeline (operational in v0.1)
 
 ```
@@ -47,9 +59,9 @@ Query → Tor search across 11 engines
      → LLM synthesis with suggested follow-up queries
 ```
 
-> _[screenshot: live console mid-investigation]_
+![Live console mid-investigation — L2 fetches, EXACT matches, categorized block detection](assets/screenshots/live-console.png)
 
-Live WebSocket console streams pipeline events. Results, IOCs, and investigation history persist to SQLite.
+Live WebSocket console streams pipeline events in real time. Standard-depth investigations typically complete in 10–15 minutes; results, IOCs, and investigation history persist to SQLite.
 
 ### Operator-in-the-loop layer (v0.2.0, in progress)
 
@@ -61,9 +73,9 @@ The interactive layer is the current milestone. The intended model:
 
 - **CAPTCHA passthrough.** The challenge surfaces in the browser panel for the operator to solve interactively. Scrape resumes from where it stopped.
 
-- **Hard blocks land in the report.** Sources the tool can't get past are logged with categorized reasons (REGISTRATION_GATED, JS_GATED, HONEYPOT, TIMEOUT, UNREACHABLE) so the operator can decide whether to pursue them manually outside the tool.
+- **Hard blocks land in the report.** Sources the tool can't get past are logged with categorized reasons (REGISTRATION_GATED, JS_GATED, HONEYPOT, TIMEOUT, UNREACHABLE, TEXT/MATH CAPTCHA) so the operator can decide whether to pursue them manually outside the tool.
 
-> _[screenshot: master identity / credential generation panel]_
+![Master identity panel — throwaway credential configuration](assets/screenshots/master-identity.png)
 
 The browser and registration logic is being completed under the v0.2.0 milestone — see the Roadmap section below for current state.
 
@@ -71,9 +83,7 @@ The browser and registration logic is being completed under the v0.2.0 milestone
 
 Synthesis is more than summarization. The LLM generates suggested **Next Queries** from the evidence — if an investigation surfaces signals worth pivoting on, the report includes pivots the operator can run immediately. The investigation drives itself forward with the operator steering.
 
-The LLM is grounded in extracted evidence and returns explicit **insufficient-data** flags when signal is weak rather than fabricating findings. The intelligence report (Infrastructure Exposure, Threat Actor References, Vulnerability Mentions, Data Exposure, Attack Timeline) shows abstention by design when evidence doesn't support a finding.
-
-> _[screenshot: intelligence report with insufficient-data abstention]_
+The LLM is grounded in extracted evidence and returns explicit **insufficient-data** flags when signal is weak rather than fabricating findings. Each finding in the intelligence report (Threat Actor Profile, Attack Methodology, Infrastructure Indicators, Victim Profile, Current Activity Assessment) is tagged with a confidence rating (HIGH / MEDIUM / LOW) and cites its source.
 
 ---
 
@@ -83,6 +93,8 @@ VIPERSHADOW does not maintain persistent operator personas. Each session uses a 
 
 When the pipeline encounters a CAPTCHA, the challenge surfaces in the browser panel for the operator to solve. When a source requires registration, the operator gets a prompt to insert saved throwaway credentials or skip the source entirely. The browser panel is an *operator escalation interface*, not autonomous interaction with gated content.
 
+![Block report — 99 blocks categorized across UNREACHABLE, HONEYPOT, JS CHALLENGE, TIMEOUT](assets/screenshots/block-report.png)
+
 Block detection categorizes each unreachable source so the operator and pipeline can make intelligent decisions about which sources are worth pursuing and which to rotate away from. This is fundamentally a reconnaissance and triage pattern, not active engagement.
 
 ---
@@ -91,11 +103,11 @@ Block detection categorizes each unreachable source so the operator and pipeline
 
 The v0.1 pipeline is operational and producing substantially more usable intelligence than shallow OSINT tools on the same queries. The depth advantage isn't coming from gated sources — those wait on v0.2.0. It's coming from the multi-layer scraping (L1–L4 with adaptive follow on matches) running against *open* content.
 
-Where single-layer tools grab the matched page and stop, VIPERSHADOW follows references two and three layers deep when matches keep landing — picking up onion addresses, related infrastructure, IOCs, and threat actor mentions surfaced by the references rather than the original search hit. A single investigation typically yields hundreds of pages scraped and thousands of extracted IOCs from open sources alone.
+Where single-layer tools grab the matched page and stop, VIPERSHADOW follows references two and three layers deep when matches keep landing — picking up onion addresses, related infrastructure, IOCs, and threat actor mentions surfaced by the references rather than the original search hit.
 
-The v0.2.0 gated-content layer expands source coverage further when complete. The depth advantage on accessible sources is already shipped.
+![Evidence panel — 13 matches, 513 IOCs, 200 pages scraped in a single investigation](assets/screenshots/evidence-panel.png)
 
-> _[screenshot: evidence panel with L1/L2 match badges and IOC counts]_
+A single Threat Actor investigation against a well-documented historical target (Conti) produced 13 matches, 513 extracted IOCs, and 200 pages scraped — with the LLM synthesizing five sections of HIGH-confidence findings from the evidence. The v0.2.0 gated-content layer expands source coverage further when complete. The depth advantage on accessible sources is already shipped.
 
 ---
 
